@@ -1,0 +1,16 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/pestphp/pest/extension.neon
+
+parameters:
+    level: 6
+
+    # Test files are not analysed. Pest binds every test closure to the test
+    # case at runtime, and PHPStan has no extension for that on Pest 4, so
+    # every $this-> call in a test reads as a call on PHPUnit\Framework\TestCase.
+    paths:
+        - app
+        - bootstrap
+        - config
+        - database
+        - routes
