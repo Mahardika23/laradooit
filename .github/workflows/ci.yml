@@ -89,6 +89,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # tsconfig resolves the ziggy-js import into vendor/, so the type check
+      # needs the PHP dependencies even though nothing here runs PHP.
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-scripts
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
