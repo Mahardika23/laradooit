@@ -6,7 +6,11 @@ laradooit is a Laravel rewrite of a private Next.js app that has been in daily u
 
 ## Status
 
-Pre-release. Nothing runs yet. The release-one spec is [issue #1](https://github.com/Mahardika23/laradooit/issues/1) and the work is broken into [ready-for-agent issues](https://github.com/Mahardika23/laradooit/issues?q=is%3Aissue+is%3Aopen+label%3Aready-for-agent).
+Pre-release. The scaffold runs: you can install the single account, log in, and
+poll a health endpoint. None of the finance features exist yet. The release-one
+spec is [issue #1](https://github.com/Mahardika23/laradooit/issues/1) and the
+work is broken into
+[ready-for-agent issues](https://github.com/Mahardika23/laradooit/issues?q=is%3Aissue+is%3Aopen+label%3Aready-for-agent).
 
 ## What release one will do
 
@@ -28,6 +32,67 @@ Statement import and reconciliation come in release two. Delivery-platform order
 - OpenRouter for extraction, optional
 - Telegram via Nutgram, optional
 - Docker Compose for self-hosting
+
+## Running it locally
+
+You need PHP 8.4, Composer, Node 22, and a PostgreSQL server. PostgreSQL is the
+only supported database; there is no SQLite fallback, in development or in tests.
+
+```sh
+composer install
+npm ci
+cp .env.example .env
+php artisan key:generate
+```
+
+Point the `DB_*` values in `.env` at your PostgreSQL server, then:
+
+```sh
+php artisan migrate
+php artisan laradooit:install
+npm run build
+php artisan serve
+```
+
+`laradooit:install` creates the one account for this instance. It takes
+`--name`, `--email` and `--password`, prompts for whatever you leave out, and
+refuses to run once an account exists. There is no registration form.
+
+`GET /up` answers without authentication and checks the database connection. It
+returns 200 when the instance is healthy and 503 when the database is
+unreachable.
+
+## Running the checks
+
+```sh
+composer test
+```
+
+That runs Pint, Larastan at level 6, and Pest in turn. The test suite needs a
+PostgreSQL database named `laradooit_test` reachable with the credentials from
+your `.env`; host, port, and credentials are read from the environment, and only
+the database name is pinned so a test run cannot touch your real data.
+
+Frontend checks are separate:
+
+```sh
+npm run format:check
+npm run lint:check
+npm run types
+```
+
+## Docker
+
+`Dockerfile` builds a single image that serves three roles, selected by the
+command: `web` (the default), `worker`, and `scheduler`.
+
+```sh
+docker build -t laradooit .
+docker run --rm -p 8080:8080 --env-file .env laradooit
+```
+
+The image carries `pdftotext` from poppler-utils for reading the text layer of
+PDF uploads.
 
 ## Principles
 
