@@ -94,6 +94,13 @@ docker run --rm -p 8080:8080 --env-file .env laradooit
 The image carries `pdftotext` from poppler-utils for reading the text layer of
 PDF uploads.
 
+## Docs
+
+- [`CONTEXT.md`](CONTEXT.md) defines every domain term the code and the issues use.
+- [`docs/adr/`](docs/adr/) records the decisions that would otherwise look surprising.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) covers the fixture rule, the two test seams, and the branch workflow.
+- [`ROADMAP.md`](ROADMAP.md) says what releases two and three hold, and what will never be built.
+
 ## Principles
 
 - One instance, one user. No tenants.
