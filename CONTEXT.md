@@ -12,6 +12,10 @@ This file is the glossary and nothing else. It holds only the terms release one 
 A place money sits or moves through — a bank account, an e-wallet, or cash in hand. Every Transaction names exactly one Account.
 _Avoid_: Wallet, source, bank
 
+**Archived**:
+The state of an Account the user no longer uses. It keeps its history — every Transaction that names it still does — but it disappears from every Account picker. Nothing is ever deleted; archiving is the only way an Account leaves view.
+_Avoid_: Deleted, disabled, closed
+
 **Category**:
 A bucket money is filed under, optionally nested beneath a parent Category so spending can be read at more than one level.
 _Avoid_: Tag, label, bucket

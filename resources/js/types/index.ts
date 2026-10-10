@@ -1,5 +1,18 @@
 import { LucideIcon } from 'lucide-react';
 
+export interface Account {
+    id: string;
+    name: string;
+    type: string;
+    typeLabel: string;
+    institution: string;
+}
+
+export interface AccountTypeOption {
+    value: string;
+    label: string;
+}
+
 export interface Auth {
     user: User;
 }
