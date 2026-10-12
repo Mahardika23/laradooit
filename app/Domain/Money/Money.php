@@ -27,6 +27,27 @@ final readonly class Money
         return new self(0, strtoupper($currency));
     }
 
+    /**
+     * Parses a decimal string the way a user types one — "12", "12.3",
+     * "12.34" — into integer minor units. Built from the digits directly,
+     * so no float ever appears in a money path. Anything it cannot parse
+     * exactly, including a third minor digit, is refused rather than
+     * rounded; the digit count is bounded so the result always fits an
+     * integer.
+     */
+    public static function fromDecimal(string $decimal, string $currency): self
+    {
+        if (preg_match('/^(-?)(\d{1,15})(?:\.(\d{1,2}))?$/', $decimal, $matches) !== 1) {
+            throw new InvalidArgumentException(
+                "Money amounts are decimal strings with at most two minor digits, never floats: got [{$decimal}]."
+            );
+        }
+
+        $minorUnits = ((int) $matches[2]) * 100 + (int) str_pad($matches[3] ?? '', 2, '0', STR_PAD_RIGHT);
+
+        return new self($matches[1] === '-' ? -$minorUnits : $minorUnits, strtoupper($currency));
+    }
+
     public function add(self $other): self
     {
         $this->assertSameCurrency($other);
@@ -81,6 +102,20 @@ final readonly class Money
             .'.'.str_pad((string) ($absolute % 100), 2, '0', STR_PAD_LEFT);
 
         return $this->isNegative() ? '-'.$formatted : $formatted;
+    }
+
+    /**
+     * The inverse of fromDecimal: the amount as a plain decimal string with
+     * exactly two minor digits, like "1200.00" or "-50.25", for prefilling
+     * money inputs. Built from the integer units, never through a float.
+     */
+    public function toDecimal(): string
+    {
+        $absolute = abs($this->minorUnits);
+
+        $decimal = intdiv($absolute, 100).'.'.str_pad((string) ($absolute % 100), 2, '0', STR_PAD_LEFT);
+
+        return $this->isNegative() ? '-'.$decimal : $decimal;
     }
 
     private static function groupThousands(int $majorUnits): string

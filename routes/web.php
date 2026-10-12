@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,13 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('accounts/{account}', [AccountController::class, 'update'])->name('accounts.update');
     Route::patch('accounts/{account}/archive', [AccountController::class, 'archive'])->name('accounts.archive');
     Route::patch('accounts/{account}/unarchive', [AccountController::class, 'unarchive'])->name('accounts.unarchive');
+
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::patch('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::patch('categories/{category}/budget', [CategoryController::class, 'setBudget'])->name('categories.budget.set');
+    Route::delete('categories/{category}/budget', [CategoryController::class, 'clearBudget'])->name('categories.budget.clear');
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 });
 
 require __DIR__.'/settings.php';

@@ -80,3 +80,54 @@ it('formats for display with grouping and two minor digits', function (int $mino
     'negative' => [-5000, 'USD', '-USD 50.00'],
     'another currency' => [2500, 'myr', 'MYR 25.00'],
 ]);
+
+it('parses a decimal string into integer minor units without ever seeing a float', function (string $decimal, int $expectedMinorUnits): void {
+    expect(Money::fromDecimal($decimal, 'USD'))->toEqual(Money::of($expectedMinorUnits, 'USD'));
+})->with([
+    'zero' => ['0', 0],
+    'zero with minor digits' => ['0.00', 0],
+    'whole major units' => ['12', 1200],
+    'one decimal place pads to two' => ['12.3', 1230],
+    'two decimal places' => ['12.34', 1234],
+    'minor units only' => ['0.07', 7],
+    'large amount' => ['1234567.89', 123456789],
+    'negative' => ['-50.25', -5025],
+]);
+
+it('normalizes the currency code when parsing', function (): void {
+    expect(Money::fromDecimal('1.00', 'usd')->currency)->toBe('USD');
+});
+
+it('refuses a decimal string it cannot parse exactly rather than rounding it', function (string $decimal): void {
+    Money::fromDecimal($decimal, 'USD');
+})->with([
+    'empty' => [''],
+    'letters' => ['lots'],
+    'three decimal places' => ['12.345'],
+    'trailing dot' => ['12.'],
+    'leading dot' => ['.5'],
+    'dot only' => ['.'],
+    'sign only' => ['-'],
+    'thousands separator' => ['1,234.56'],
+    'scientific notation' => ['1e3'],
+    'more major digits than an integer can hold' => ['1234567890123456'],
+])->throws(InvalidArgumentException::class);
+
+it('renders integer minor units as a decimal string with exactly two minor digits', function (int $minorUnits, string $expected): void {
+    expect(Money::of($minorUnits, 'USD')->toDecimal())->toBe($expected);
+})->with([
+    'zero' => [0, '0.00'],
+    'minor units only' => [7, '0.07'],
+    'whole major units' => [1200, '12.00'],
+    'two minor digits' => [1234, '12.34'],
+    'negative' => [-5025, '-50.25'],
+]);
+
+it('round-trips a decimal string through parsing and rendering', function (string $decimal, string $rendered): void {
+    expect(Money::fromDecimal($decimal, 'USD')->toDecimal())->toBe($rendered);
+})->with([
+    'whole' => ['12', '12.00'],
+    'one decimal place' => ['12.3', '12.30'],
+    'two decimal places' => ['12.34', '12.34'],
+    'negative' => ['-50.25', '-50.25'],
+]);
