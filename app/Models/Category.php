@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 /**
  * @property string $id
@@ -54,6 +55,26 @@ class Category extends Model
             'budget_amount' => MoneyCast::class,
             'budget_period' => BudgetPeriod::class,
         ];
+    }
+
+    /**
+     * A Category cannot be its own ancestor, however the move is attempted:
+     * the move form refuses it as a validation error, and this guard refuses
+     * it on every other write path with a loud exception.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (Category $category): void {
+            if (! $category->isDirty('parent_id') || $category->parent_id === null) {
+                return;
+            }
+
+            $parent = $category->parent()->first();
+
+            if ($parent !== null && $parent->isSelfOrDescendantOf($category)) {
+                throw new InvalidArgumentException('A Category cannot be its own ancestor.');
+            }
+        });
     }
 
     /**

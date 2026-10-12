@@ -76,20 +76,23 @@ class CategoryController extends Controller
     /**
      * The tree as nested nodes, parents and children alike, each carrying
      * its Budget if it has one. Built from one flat fetch rather than
-     * recursive queries.
+     * recursive queries. The path guard keeps even a hand-edited cycle from
+     * recursing forever, the same scenario Category::ancestors guards.
      *
      * @param  Collection<int, Category>  $categories
+     * @param  list<string>  $path
      * @return list<array<string, mixed>>
      */
-    private function presentTree(Collection $categories, ?string $parentId = null): array
+    private function presentTree(Collection $categories, ?string $parentId = null, array $path = []): array
     {
         return $categories->where('parent_id', $parentId)
+            ->reject(fn (Category $category): bool => in_array($category->id, $path, true))
             ->map(fn (Category $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'parentId' => $category->parent_id,
                 'budget' => $this->presentBudget($category),
-                'children' => $this->presentTree($categories, $category->id),
+                'children' => $this->presentTree($categories, $category->id, [...$path, $category->id]),
             ])
             ->values()
             ->all();
@@ -97,17 +100,19 @@ class CategoryController extends Controller
 
     /**
      * Every Category as a flat parent-picker list in tree order, each with
-     * its depth so the picker can indent.
+     * its depth so the picker can indent. Guarded like presentTree.
      *
      * @param  Collection<int, Category>  $categories
+     * @param  list<string>  $path
      * @return list<array{id: string, name: string, depth: int}>
      */
-    private function presentParentOptions(Collection $categories, ?string $parentId = null, int $depth = 0): array
+    private function presentParentOptions(Collection $categories, ?string $parentId = null, int $depth = 0, array $path = []): array
     {
         return $categories->where('parent_id', $parentId)
+            ->reject(fn (Category $category): bool => in_array($category->id, $path, true))
             ->flatMap(fn (Category $category): array => array_merge(
                 [['id' => $category->id, 'name' => $category->name, 'depth' => $depth]],
-                $this->presentParentOptions($categories, $category->id, $depth + 1),
+                $this->presentParentOptions($categories, $category->id, $depth + 1, [...$path, $category->id]),
             ))
             ->values()
             ->all();
