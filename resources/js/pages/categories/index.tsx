@@ -73,8 +73,8 @@ function CategoryItem({
 
     // A Category cannot be its own ancestor, so the move picker offers
     // neither the Category itself nor anything beneath it.
-    const hidden = [node.id, ...descendantIds(node)];
-    const moveOptions = parentOptions.filter((option) => !hidden.includes(option.id));
+    const excludedIds = [node.id, ...descendantIds(node)];
+    const moveOptions = parentOptions.filter((option) => !excludedIds.includes(option.id));
 
     const startEditing = () => {
         editForm.setData({ name: node.name, parent_id: node.parentId });

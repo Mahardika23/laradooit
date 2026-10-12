@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
+use InvalidArgumentException;
 
 it('redirects guests to the login page', function (): void {
     $this->get('/categories')->assertRedirect('/login');
@@ -169,6 +170,13 @@ it('refuses to move a category under one of its own descendants, because a Categ
 
     expect($food->refresh()->parent_id)->toBeNull();
 });
+
+it('refuses to write a cycle however the move is attempted', function (): void {
+    $food = Category::factory()->create();
+    $groceries = Category::factory()->create(['parent_id' => $food->id]);
+
+    $food->update(['parent_id' => $groceries->id]);
+})->throws(InvalidArgumentException::class, 'its own ancestor');
 
 it('sets a budget on a category, storing the amount as integer minor units', function (): void {
     $category = Category::factory()->create();
