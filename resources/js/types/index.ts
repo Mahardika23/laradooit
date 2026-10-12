@@ -13,6 +13,32 @@ export interface AccountTypeOption {
     label: string;
 }
 
+export interface CategoryBudget {
+    amount: string;
+    amountDecimal: string;
+    period: string;
+    periodLabel: string;
+}
+
+export interface CategoryNode {
+    id: string;
+    name: string;
+    parentId: string | null;
+    budget: CategoryBudget | null;
+    children: CategoryNode[];
+}
+
+export interface CategoryParentOption {
+    id: string;
+    name: string;
+    depth: number;
+}
+
+export interface BudgetPeriodOption {
+    value: string;
+    label: string;
+}
+
 export interface Auth {
     user: User;
 }
