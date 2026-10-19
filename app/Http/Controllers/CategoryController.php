@@ -8,6 +8,7 @@ use App\Http\Requests\Categories\SetBudgetRequest;
 use App\Http\Requests\Categories\StoreCategoryRequest;
 use App\Http\Requests\Categories\UpdateCategoryRequest;
 use App\Models\Category;
+use App\Support\CategoryOptions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -21,7 +22,7 @@ class CategoryController extends Controller
 
         return Inertia::render('categories/index', [
             'categories' => $this->presentTree($categories),
-            'parentOptions' => $this->presentParentOptions($categories),
+            'parentOptions' => CategoryOptions::inTreeOrder(),
             'budgetPeriods' => array_map(
                 fn (BudgetPeriod $period): array => ['value' => $period->value, 'label' => $period->label()],
                 BudgetPeriod::cases(),
@@ -94,26 +95,6 @@ class CategoryController extends Controller
                 'budget' => $this->presentBudget($category),
                 'children' => $this->presentTree($categories, $category->id, [...$path, $category->id]),
             ])
-            ->values()
-            ->all();
-    }
-
-    /**
-     * Every Category as a flat parent-picker list in tree order, each with
-     * its depth so the picker can indent. Guarded like presentTree.
-     *
-     * @param  Collection<int, Category>  $categories
-     * @param  list<string>  $path
-     * @return list<array{id: string, name: string, depth: int}>
-     */
-    private function presentParentOptions(Collection $categories, ?string $parentId = null, int $depth = 0, array $path = []): array
-    {
-        return $categories->where('parent_id', $parentId)
-            ->reject(fn (Category $category): bool => in_array($category->id, $path, true))
-            ->flatMap(fn (Category $category): array => array_merge(
-                [['id' => $category->id, 'name' => $category->name, 'depth' => $depth]],
-                $this->presentParentOptions($categories, $category->id, $depth + 1, [...$path, $category->id]),
-            ))
             ->values()
             ->all();
     }

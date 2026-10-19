@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,6 +31,9 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('categories/{category}/budget', [CategoryController::class, 'setBudget'])->name('categories.budget.set');
     Route::delete('categories/{category}/budget', [CategoryController::class, 'clearBudget'])->name('categories.budget.clear');
     Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    Route::post('transactions', [TransactionController::class, 'store'])->name('transactions.store');
 });
 
 require __DIR__.'/settings.php';

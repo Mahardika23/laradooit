@@ -62,6 +62,20 @@ refuses to run once an account exists. There is no registration form.
 returns 200 when the instance is healthy and 503 when the database is
 unreachable.
 
+### Instance configuration
+
+Three environment values decide how money reads on this instance, and all
+three have deliberate defaults in `.env.example`:
+
+- `APP_CURRENCY` (default `USD`): the one base currency. Every amount is
+  stored as minor units of it. Set it before any money is recorded; changing
+  it later reinterprets every stored amount.
+- `APP_TIMEZONE` (default `UTC`): the instance timezone. Cycle boundaries are
+  drawn at midnight in this timezone, so a purchase near midnight lands in
+  the month or week you would point at.
+- `APP_WEEK_START` (default `monday`, or `sunday`): the day the calendar
+  week begins, which is what a weekly Budget is measured against.
+
 ## Running the checks
 
 ```sh

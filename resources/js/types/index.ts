@@ -39,6 +39,52 @@ export interface BudgetPeriodOption {
     label: string;
 }
 
+export interface TransactionRow {
+    id: string;
+    occurredOn: string;
+    merchant: string;
+    amount: string;
+    direction: string;
+    kind: string;
+    kindLabel: string;
+    category: string | null;
+    account: string;
+    internal: boolean;
+}
+
+export interface TransactionCycle {
+    label: string;
+    param: string;
+    previous: string;
+    next: string;
+}
+
+export interface TransactionTotals {
+    spent: string;
+    received: string;
+}
+
+export interface TransactionAccountOption {
+    id: string;
+    name: string;
+}
+
+export interface TransactionCategoryOption {
+    id: string;
+    name: string;
+    depth: number;
+}
+
+export interface TransactionDirectionOption {
+    value: string;
+    label: string;
+}
+
+export interface TransactionKindOption {
+    value: string;
+    label: string;
+}
+
 export interface Auth {
     user: User;
 }
